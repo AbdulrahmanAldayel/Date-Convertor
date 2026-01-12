@@ -160,4 +160,4 @@ The application uses multiple conversion methods:
 
 **Abdulrahman Aldayel**
 
-**Readme markup was made with the hel0 of AI**
+**Readme markup was made with the help of AI**
