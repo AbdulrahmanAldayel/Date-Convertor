@@ -1,0 +1,413 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+from tkcalendar import DateEntry
+from hijridate import Gregorian, Hijri
+from datetime import datetime
+import pyglet
+
+class IntegerEntry(tk.Entry):
+    def __init__(self, *args, **kwargs):
+        tk.Entry.__init__(self, *args, **kwargs)
+        self.config(validate="key", validatecommand=(self.register(self._validate), '%P'))
+
+    def _validate(self, P):
+        """Validate the input: Only allow digits or empty string."""
+        return P.isdigit() or P == ""
+
+# Singleton for managing GUI
+class GUIManager:
+    _instance = None
+
+    def __new__(cls):
+        if not cls._instance:
+            cls._instance = super(GUIManager, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        pyglet.font.add_file('C:/Users/aaldayel/Desktop/Date Converter/YakoutLinotypeLight-Bold.ttf')
+        pyglet.font.add_file('C:/Users/aaldayel/Desktop/Date Converter/Montserrat-VariableFont_wght.ttf')
+
+        self.root = tk.Tk()
+        self.style = ttk.Style()
+        
+        self.root.geometry("500x600")
+        self.root.iconbitmap("C:/Users/aaldayel/Desktop/Date Converter/ico.ico")
+        self.root.configure(background='white')
+        self.style.configure('TLabelframe', background="white") 
+        self.style.configure('TLabelframe.Label', background="white")
+        self.style.configure('TRadiobutton', background="white")
+        self.style.configure('TLabel', background="white", bd=0, highlightthickness=0, relief='flat')
+        self.style.configure('TFrame', background="white")
+        self.style.configure('TPhotoImage', highlightthickness=0)
+        self.style.configure("TOptionMenu", background='red')
+
+        self.months_ar = {
+            '1 - يناير - كانون ثاني': 1,
+            '2 - فبراير - شباط': 2,
+            '3 - مارس - آذار': 3,
+            '4 - أبريل - نيسان': 4,
+            '5 - مايو - أيار': 5,
+            '6 - يونيو - حزيران': 6,
+            '7 - يوليو - تموز': 7,
+            '8 - أغسطس - آب': 8,
+            '9 - سبتمبر -  أيلول': 9,
+            '10 - أكتوبر -  تشرين أول': 10,
+            '11 - نوفمبر -  تشرين ثاني': 11,
+            '12 - ديسبمر -  كانون أول': 12
+        }
+
+        self.months_en = {
+            '1 - January': 1,
+            '2 - February': 2,
+            '3 - March': 3,
+            '4 - April': 4,
+            '5 - May': 5,
+            '6 - June': 6,
+            '7 - July': 7,
+            '8 - August': 8,
+            '9 - September': 9,
+            '10 - October': 10,
+            '11 - November': 11,
+            '12 - December': 12
+        }
+
+
+        # Language Buttons Frame
+        self.language_frame = tk.Frame(self.root)
+        self.language_frame.pack(side=tk.TOP, anchor=tk.NE, padx=10, pady=10)  # Positioned on the top right
+        self.language_frame.configure(background='white')
+
+        # Language Buttons
+        self.english_button = tk.Button(self.language_frame, text="English", command=self.set_language_english)
+        self.english_button.pack(side=tk.RIGHT, padx=5)
+
+        self.korean_button = tk.Button(self.language_frame, text="한국어", command=self.set_language_korean)
+        self.korean_button.pack(side=tk.RIGHT, padx=5)
+
+        self.arabic_button = tk.Button(self.language_frame, text="عربي", command=self.set_language_arabic)
+        self.arabic_button.pack(side=tk.RIGHT, padx=5)
+        self.arabic_button.invoke() #Default language Arabic
+
+        # Bottom Frame
+        self.bottom_frame = tk.Frame(self.root)
+        self.bottom_frame.pack(side=tk.BOTTOM, ipadx=10, ipady=10, fill=tk.X)  # Positioned on the bottom
+        self.bottom_frame.configure(background='white')
+
+        # Image Placeholder and Title
+        self.logo = tk.PhotoImage(file='C:/Users/aaldayel/Desktop/Date Converter/llogo.png')
+        logo_label = tk.Label(self.bottom_frame, image=self.logo, relief='ridge', bd=0, highlightthickness=0)
+        logo_label.pack(side="right", anchor=tk.SE, pady=10, padx=10)
+
+        self.title_label = tk.Label(self.root, text="محول التاريخ الهجري", font=("Yakout Linotype Light", 30, 'bold'))
+        self.title_label.pack(pady=(0, 0))
+        self.title_label.configure(background='white')
+
+        # Frame for radio buttons
+        self.radio_frame = ttk.LabelFrame(self.root, text="التقويم", labelanchor='ne' ,padding=10)
+        self.radio_frame.pack(pady=10, padx=50, anchor=tk.CENTER)
+        
+
+        # Radio Buttons
+        self.selected_option = tk.StringVar()
+        self.hijriButton = ttk.Radiobutton(self.radio_frame, text="هجري", variable=self.selected_option, value="hijri", command=self.on_option_change)
+        self.hijriButton.pack(side=tk.RIGHT, anchor=tk.E, padx=10)
+        self.gregorianButton = ttk.Radiobutton(self.radio_frame, text="غريغوري", variable=self.selected_option, value="gregorian", command=self.on_option_change)
+        self.gregorianButton.pack(side=tk.RIGHT, anchor=tk.E, padx=10)
+
+         # Frame for date input fields
+        self.date_input_frame = tk.Frame(self.root, bg='white', bd=0, highlightthickness=0, relief='ridge')
+        self.date_input_frame.pack(pady=20)
+
+        # Year Input
+        self.year_label = tk.Label(self.date_input_frame, text="", bg='white', font=("Yakout Linotype Light", 14, 'bold'))
+        
+        self.year_label.grid_forget()
+        self.year_entry = tk.Entry(self.date_input_frame, width=10, validate="key", validatecommand=(self.on_validate, '%P'))
+        self.year_entry.set('عام')
+        
+        self.year_entry.grid_forget()
+        # Month Input
+
+        # String variable to store selected month name
+        #self.selected_month = tk.StringVar()
+
+        
+
+        # Dropdown menu for months
+        self.month_label = tk.Label(self.date_input_frame, text="", bg='white', font=("Yakout Linotype Light", 14, 'bold'))
+        self.month_label.grid_forget()
+
+        self.month_dropdown = ttk.Combobox(self.date_input_frame, values=list(self.months_ar.keys()), width=12, font=("Yakout Linotype Light", 12 ))
+        self.month_dropdown.set('الشهر')
+        self.month_dropdown.configure(justify='center')
+
+        
+        #self.month_entry = tk.Entry(self.date_input_frame, width=10)
+        #self.month_entry.grid_forget()
+
+        # Day Input
+        self.day_label = tk.Label(self.date_input_frame, text="", bg='white',font=("Yakout Linotype Light", 14, 'bold'))
+        
+        self.day_label.grid_forget()
+        self.day_entry = tk.Entry(self.date_input_frame, width=10)
+        
+        self.day_entry.grid_forget()
+
+        # Convert Button
+        self.convert_button = tk.Button(self.root, text="حول", command=self.display_selected_date, state=tk.DISABLED, font=("Yakout Linotype Light", 15, 'bold'), width=10)
+        self.convert_button.pack(pady=10)
+
+        # Info Button
+        self.info_button = tk.Button(self.bottom_frame, text="معلومات", command=self.display_info)
+        self.info_button.pack(side="left", fill='x', anchor=tk.SW, pady=10, padx=10)
+
+    def on_validate(self, P):
+        if P.isdigit() or P == "":
+            return True
+        else:
+            return False
+
+    
+    def on_option_change(self):
+        for widget in self.date_input_frame.winfo_children():
+            widget.forget()
+
+        self.display_label.config(text='')
+        self.year_entry.delete(0, 'end')
+        #self.month_entry.delete(0, 'end')
+        self.day_entry.delete(0, 'end')
+
+        if self.selected_option.get() == "hijri":
+            if self.lang=="ar":
+                self.year_label.grid(row=0, column=5)
+                self.year_entry.grid(row=0, column=4, padx=10)
+                self.month_label.grid(row=0, column=3)
+                self.month_dropdown.grid(row=0, column=3)
+                self.month_dropdown.grid(row=0, column=2, padx=10)
+                self.day_label.grid(row=0, column=1)
+                self.day_entry.grid(row=0, column=0, padx=10)
+                
+            else:
+                self.year_label.grid(row=0, column=0)
+                self.year_entry.grid(row=0, column=1, padx=10)
+                self.month_label.grid(row=0, column=2)
+                self.month_dropdown.grid(row=0, column=3, padx=10)
+                self.day_label.grid(row=0, column=4)
+                self.day_entry.grid(row=0, column=5, padx=10)
+            self.convert_button.config(state=tk.NORMAL)
+
+        elif self.selected_option.get() == "gregorian":
+            if self.lang=="ar":
+                self.year_label.grid(row=0, column=5)
+                self.year_entry.grid(row=0, column=4, padx=10)
+                self.month_label.grid(row=0, column=3)
+                self.month_dropdown.grid(row=0, column=2, padx=10)
+                self.day_label.grid(row=0, column=1)
+                self.day_entry.grid(row=0, column=0, padx=10)
+                
+            else:
+                self.year_label.grid(row=0, column=0)
+                self.year_entry.grid(row=0, column=1, padx=10)
+                self.month_label.grid(row=0, column=2)
+                self.month_dropdown.grid(row=0, column=3, padx=10)
+                self.day_label.grid(row=0, column=4)
+                self.day_entry.grid(row=0, column=5, padx=10)
+            self.convert_button.config(state=tk.NORMAL)
+    
+    def is_valid_date(self, year, month, day):
+        try:
+            datetime(int(year), int(month), int(day))
+            return True
+        except ValueError:
+            return False
+
+    def display_selected_date(self):
+        year = self.year_entry.get()
+        selected_month_name = self.selected_month.get()
+        month = self.months_ar[selected_month_name]
+        day = self.day_entry.get()
+        
+        if not self.is_valid_date(year, month, day):
+            if self.lang=="en":
+                messagebox.showerror("Error", "Invalid date entered!")
+                return
+            elif self.lang=="kr":
+                messagebox.showerror("에러", "잘못된 날짜 입력!")
+                return
+            elif self.lang=="ar":
+                messagebox.showerror("خطأ", "التاريخ المدخل غير صحيح")
+                return
+        if self.selected_option.get() == "gregorian":
+            gregorian_date = datetime.strptime(f"{year}-{month}-{day}", '%Y-%m-%d').date()
+            hijri_date = Gregorian(gregorian_date.year, gregorian_date.month, gregorian_date.day).to_hijri()
+
+            formatted_gregorian_date = gregorian_date.strftime('%d/%m/%Y')
+            formatted_hijri_date = f"{hijri_date.day}/{hijri_date.month}/{hijri_date.year}"
+
+            p1 = f"التاريخ {formatted_gregorian_date} يوافق"
+            p2 = f" {formatted_hijri_date}"
+            p = p1 + p2
+
+            if self.lang == "en":
+                self.display_label.config(text=f"The date {formatted_gregorian_date} is {formatted_hijri_date}", font=("MONTSERRAT 14 bold"))
+            elif self.lang == "ar":
+                self.display_label.config(text=p, font=("Yakout Linotype Light", 14, 'bold'))
+            elif self.lang == "kr":
+                self.display_label.config(text=f"{formatted_gregorian_date}는 {formatted_hijri_date}입니다", font=("MONTSERRAT 14 bold"))
+        else:
+            hijri_date = datetime.strptime(f"{year}-{month}-{day}", '%Y-%m-%d').date()
+            gregorian_date = Hijri(hijri_date.year, hijri_date.month, hijri_date.day).to_gregorian()
+
+            formatted_hijri_date = hijri_date.strftime('%d/%m/%Y')
+            formatted_gregorian_date = f"{gregorian_date.day}/{gregorian_date.month}/{gregorian_date.year}"
+
+            p1 = f"التاريخ {formatted_hijri_date} يوافق"
+            p2 = f" {formatted_gregorian_date}"
+            p = p1 + p2
+
+            if self.lang == "en":
+                self.display_label.config(text=f"The date {formatted_hijri_date} is {formatted_gregorian_date}", font=("MONTSERRAT 14 bold"))
+            elif self.lang == "ar":
+                self.display_label.config(text=p, font=("Yakout Linotype Light", 14, 'bold'))
+            elif self.lang == "kr":
+                self.display_label.config(text=f"{formatted_hijri_date}는 {formatted_gregorian_date}입니다", font=("MONTSERRAT 14 bold"))
+
+    def display_info(self):
+        if self.lang == "en":
+            messagebox.showinfo("Info", "Developed by Abdulrahman Aldayel \n\nMIT License\nCopyright (c) 2024 Abdulrahman Aldayel")
+        elif self.lang == "ar":
+            messagebox.showinfo("معلومات", "تطوير عبدالرحمن الدايل \n\nMIT رخصة\nحقوق النشر (c) 2024 Abdulrahman Aldayel")
+        elif self.lang == "kr":
+            messagebox.showinfo("정보", "압도라만 아다엘에 의해 개발됨\n\nMIT 허가서\n\n저작권 (c) 2024 Abdulrahman Aldayel")
+    
+    def set_language_arabic(self):
+        self.lang = "ar"
+
+        self.root.title("محول التاريخ الهجري") #Window Title
+        self.style.configure('TLabelframe.Label', font=("Yakout Linotype Light", 16, 'bold')) #Frame Title
+        self.style.configure('TRadiobutton', font=("Yakout Linotype Light", 15)) #Radio Button
+
+        self.title_label.config(text="محول التاريخ الهجري")
+        self.title_label.config(font=("Yakout Linotype Light", 30, 'bold'))
+        self.title_label.pack(pady=(0, 0))
+
+        self.radio_frame.config(text="التقويم")
+        self.radio_frame.config(labelanchor='ne')
+
+        self.hijriButton.config(text="هجري")
+        self.gregorianButton.config(text="غريغوري")
+
+        self.convert_button.config(text="حول")
+
+        self.info_button.config(text="معلومات")
+
+        self.year_label.config(text=":عام")
+        self.year_label.config(font=("Yakout Linotype Light", 14, 'bold'))
+        self.month_label.config(text=":شهر")
+        self.month_label.config(font=("Yakout Linotype Light", 14, 'bold'))
+        self.day_label.config(text=":يوم")
+        self.day_label.config(font=("Yakout Linotype Light", 14, 'bold'))
+
+        self.year_entry = IntegerEntry(self.date_input_frame, width=10, validate="key", validatecommand=(self.on_validate, "%P"))
+
+        if self.display_label.cget("text"):
+            self.display_selected_date()
+
+        if self.convert_button['state'] != 'disabled':
+            self.year_label.grid(row=0, column=5)
+            self.year_entry.grid(row=0, column=4, padx=10)
+            self.month_label.grid(row=0, column=3)
+            self.month_entry.grid(row=0, column=2, padx=10)
+            self.day_label.grid(row=0, column=1)
+            self.day_entry.grid(row=0, column=0, padx=10)
+
+    def set_language_english(self):
+        self.lang = "en"
+
+        self.root.title("Hijri Date Converter")
+        self.style.configure('TLabelframe.Label', font=("MONTSERRAT", 14, 'bold')) #Frame Title
+        self.style.configure('TRadiobutton', font=("MONTSERRAT", 13)) #Radio Button
+
+        self.title_label.config(text="Hijri Date Converter")
+        self.title_label.config(font=("MONTSERRAT 20 bold"))
+        self.title_label.pack(pady=(30, 12))
+
+        self.radio_frame.config(text="Calender")
+        self.radio_frame.config(labelanchor='nw')
+
+        self.hijriButton.config(text="Hijri")
+        self.gregorianButton.config(text="Gregorian")
+
+        self.convert_button.config(text="Convert")
+        self.convert_button.configure(font=("MONTSERRAT", 15, 'bold'))
+
+        self.info_button.config(text="Info")
+
+        self.year_label.config(text="Year:")
+        self.year_label.config(font=("MONTSERRAT", 12, 'bold'))
+        self.month_label.config(text="Month:")
+        self.month_label.config(font=("MONTSERRAT", 12, 'bold'))
+        self.day_label.config(text="Day:")
+        self.day_label.config(font=("MONTSERRAT", 12, 'bold'))
+
+        self.year_entry = IntegerEntry(self.date_input_frame, width=10, validate="key", validatecommand=(self.on_validate, "%P"))
+
+        if self.display_label.cget("text"):
+            self.display_selected_date()
+        
+        if self.convert_button['state'] != 'disabled':
+            self.year_label.grid(row=0, column=0)
+            self.year_entry.grid(row=0, column=1, padx=10)
+            self.month_label.grid(row=0, column=2)
+            self.month_entry.grid(row=0, column=3, padx=10)
+            self.day_label.grid(row=0, column=4)
+            self.day_entry.grid(row=0, column=5, padx=10)
+    def set_language_korean(self):
+        self.lang = "kr"
+
+        self.root.title("히즈리 날짜 변환기")
+
+        self.title_label.config(text="히즈리 날짜 변환기")
+        self.title_label.config(font=("MONTSERRAT 20 bold"))
+        self.title_label.pack(pady=(0, 0))
+
+        self.radio_frame.config(text="달력")
+        self.radio_frame.config(labelanchor='nw')
+
+        self.hijriButton.config(text="히즈라력")
+        self.gregorianButton.config(text="그레고리력")
+
+        self.convert_button.config(text="변환")
+
+        self.info_button.config(text="정보")
+
+        self.year_label.config(text="년:")
+        self.year_label.config(font=("MONTSERRAT", 14, 'bold'))
+        self.month_label.config(text="월:")
+        self.month_label.config(font=("MONTSERRAT", 14, 'bold'))
+        self.day_label.config(text="일:")
+        self.day_label.config(font=("MONTSERRAT", 14, 'bold'))
+
+        self.year_entry = IntegerEntry(self.date_input_frame, width=10, validate="key", validatecommand=(self.on_validate, "%P"))
+
+        if self.display_label.cget("text"):
+            self.display_selected_date()
+        
+        if self.convert_button['state'] != 'disabled':
+            self.year_label.grid(row=0, column=0)
+            self.year_entry.grid(row=0, column=1, padx=10)
+            self.month_label.grid(row=0, column=2)
+            self.month_entry.grid(row=0, column=3, padx=10)
+            self.day_label.grid(row=0, column=4)
+            self.day_entry.grid(row=0, column=5, padx=10)
+
+    def start(self):
+        self.display_label = tk.Label(self.root, text="")
+        self.display_label.pack(pady=20)
+        self.display_label.configure(background='white', bd=0, highlightthickness=0, relief='ridge')
+        self.root.mainloop()
+
+
+if __name__ == "__main__":
+    GUIManager().start()

@@ -1,0 +1,7 @@
+# Core dependencies
+tkinter  # Usually comes with Python, but listed for completeness
+hijridate>=0.2.2
+pyglet>=2.0.0
+
+# Optional: For enhanced calendar widgets
+tkcalendar>=1.6.0
