@@ -1,70 +1,69 @@
-# Hijri Date Converter 📅
+# Hijri Date Converter
 
-A multilingual desktop application for converting between Hijri (Islamic) and Gregorian calendars with support for Arabic, English, and Korean languages.
+A desktop application for converting between Hijri (Islamic) and Gregorian calendars with support for Arabic, English, and Korean languages.
 
-## Features ✨
+## Features
 
-- **Bidirectional Conversion**: Convert dates between Hijri and Gregorian calendars
-- **Multilingual Support**: Full interface support for Arabic, English, and Korean
-- **Modern GUI**: Clean and intuitive interface built with Tkinter
-- **Accurate Calculations**: Uses reliable conversion algorithms
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-- **Custom Fonts**: Includes IBM Plex Sans Arabic and Montserrat fonts for optimal typography
+- Bidirectional conversion between Hijri and Gregorian calendars
+- Full interface support for Arabic, English, and Korean
+- Clean, modern GUI built with Tkinter
+- Accurate conversion algorithms
+- Cross-platform (Windows, macOS, Linux)
+- Custom fonts for optimal display in all languages
 
-
-## File Structure 📁
+## File Structure
 
 ```
 Date Converter/
 ├── main.py                    # Application entry point
 ├── setup.py                   # Package setup script
 ├── requirements.txt           # Python dependencies
-├── README.md                  # This file
-├── src/                       # Source code directory
-│   ├── __init__.py           # Package initialization
-│   ├── config/               # Configuration module
+├── README.md
+├── src/                       # Source code
+│   ├── __init__.py
+│   ├── config/               # Settings and constants
 │   │   ├── __init__.py
-│   │   └── settings.py      # Application settings and constants
-│   ├── core/                # Business logic
+│   │   └── settings.py
+│   ├── core/                 # Business logic
 │   │   ├── __init__.py
-│   │   └── calendar_converter.py  # Date conversion algorithms
-│   ├── localization/        # Internationalization
+│   │   └── calendar_converter.py
+│   ├── localization/         # Translations
 │   │   ├── __init__.py
-│   │   └── translations.py  # Multi-language support
-│   ├── ui/                  # User interface
+│   │   └── translations.py
+│   ├── ui/                   # GUI components
 │   │   ├── __init__.py
-│   │   └── main_window.py   # Main GUI application
-│   └── utils/               # Utility functions
+│   │   └── main_window.py
+│   └── utils/
 │       ├── __init__.py
-│       └── logger.py        # Logging configuration
-├── fonts/                    # Custom fonts directory
+│       └── logger.py
+├── fonts/                    # Custom fonts
 │   ├── IBMPlexSansArabic-Regular.ttf
 │   ├── Montserrat-VariableFont_wght.ttf
 │   ├── Cairo-Regular.ttf
 │   └── YakoutLinotypeLight-Regular.ttf
-├── images/                   # Application assets
-│   ├── ico.ico              # Application icon
-│   └── llogo.png            # Logo
-├── legacy/                   # Legacy files (refactored)
-│   ├── DateConverter.py     # Original monolithic GUI
-│   ├── KuwaitiCalender.py   # Original calendar algorithm
-│   ├── names.py             # Original translation data
-│   └── hijricalendar-kuwaiti.js  # JavaScript version
-└── logs/                     # Application logs (created at runtime)
+├── images/
+│   ├── ico.ico
+│   └── llogo.png
+├── legacy/                   # Original files (refactored)
+│   ├── DateConverter.py
+│   ├── KuwaitiCalender.py
+│   ├── names.py
+│   └── hijricalendar-kuwaiti.js
+└── logs/                     # Generated at runtime
 ```
 
-## Installation 🚀
+## Installation
 
-### Prerequisites
+### Requirements
 
-- Python 3.7 or higher
-- Required packages: tkinter, tkcalendar, hijridate, pyglet
+- Python 3.7+
+- tkinter, tkcalendar, hijridate, pyglet
 
 ### Setup
 
-1. Clone or download this repository
+1. Clone or download the repository
 2. Navigate to the project directory
-3. Install the required packages:
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -74,92 +73,82 @@ Date Converter/
    python main.py
    ```
 
-### Development Setup
-
-For development, you can install the package in editable mode:
+For development, install in editable mode:
 ```bash
 pip install -e .
 ```
 
-## Usage 📖
+## Usage
 
-1. **Launch the Application**: Run `python main.py`
-2. **Select Language**: Choose between Arabic (عربي), English, or Korean (한국어)
-3. **Choose Calendar Type**: Select either Hijri or Gregorian as input
-4. **Enter Date**: Input the day, month, and year
-5. **Convert**: Click the convert button to see the equivalent date in the other calendar
-6. **View Results**: The converted date appears with weekday information
+1. Run `python main.py`
+2. Select your language (Arabic, English, or Korean)
+3. Choose input calendar type (Hijri or Gregorian)
+4. Enter the date (day, month, year)
+5. Click convert to see the equivalent date
+6. Results show the converted date with weekday
 
-## Technical Details 🔧
+## Technical Details
 
 ### Architecture
 
-The refactored application follows a clean, modular architecture with clear separation of concerns:
+The application uses a modular structure with separation of concerns:
 
-- **Configuration Management**: Centralized settings in `src/config/settings.py`
-- **Business Logic**: Calendar conversion algorithms in `src/core/calendar_converter.py`
-- **Internationalization**: Multi-language support in `src/localization/translations.py`
-- **User Interface**: GUI components in `src/ui/main_window.py`
-- **Utilities**: Helper functions and logging in `src/utils/logger.py`
+- **Configuration**: Centralized settings in `src/config/settings.py`
+- **Core Logic**: Calendar conversion in `src/core/calendar_converter.py`
+- **Translations**: Multi-language support in `src/localization/translations.py`
+- **UI**: GUI components in `src/ui/main_window.py`
+- **Utilities**: Logging and helpers in `src/utils/`
 
-### Core Components
+### Components
 
-- **main.py**: Application entry point with proper initialization and error handling
-- **Calendar Converter**: Implements both Hijri-Gregorian conversion and Kuwaiti calendar algorithm
-- **Translation System**: Type-safe multilingual support with easy extensibility
-- **Resource Manager**: Handles fonts and images with proper path resolution
-- **Configuration System**: Centralized settings with type hints and validation
+**main.py** - Entry point with initialization and error handling
+
+**Calendar Converter** - Implements Hijri-Gregorian conversion using the hijridate library and Kuwaiti calendar algorithm
+
+**Translation System** - Type-safe multilingual support for easy language additions
+
+**Resource Manager** - Handles fonts and images with proper path resolution
 
 ### Design Patterns
 
-- **Singleton Pattern**: Resource management for efficient memory usage
-- **Strategy Pattern**: Pluggable calendar conversion algorithms
-- **Factory Pattern**: Translation and UI component creation
-- **Observer Pattern**: Language change notifications
+The code uses several patterns for maintainability:
+- Singleton for resource management
+- Strategy for conversion algorithms
+- Factory for UI component creation
+- Observer for language change updates
 
-### Conversion Algorithm
+### GUI
 
-The application uses multiple conversion methods:
-- **Primary**: hijridate library for reliable conversions
-- **Alternative**: Kuwaiti calendar algorithm for historical accuracy
-- **Validation**: Comprehensive date validation and error handling
+- Responsive layout with RTL/LTR support
+- Real-time input validation
+- Language switching without data loss
+- Clean white background with professional fonts
+- Efficient resource loading
 
-### GUI Features
+## Dependencies
 
-- **Responsive Layout**: Adapts to different languages and text directions (RTL/LTR)
-- **Input Validation**: Real-time validation with user-friendly error messages
-- **Dynamic Updates**: Seamless language switching without data loss
-- **Modern Styling**: Clean white background with professional typography
-- **Resource Management**: Efficient font and image loading
+- `tkinter` - GUI framework (bundled with Python)
+- `tkcalendar` - Calendar widget
+- `hijridate` - Date conversion library
+- `pyglet` - Font loading
 
-## Dependencies 📦
+## Language Support
 
-- `tkinter`: GUI framework (included with Python)
-- `tkcalendar`: Calendar widget for date selection
-- `hijridate`: Hijri-Gregorian date conversion library
-- `pyglet`: Font loading and multimedia support
-
-## Language Support 🌍
-
-### Arabic (عربي)
-- RTL layout support
+**Arabic (عربي)**
+- Right-to-left layout
 - IBM Plex Sans Arabic font
-- Full Arabic month and day names
+- Arabic month and day names
 
-### English
-- LTR layout
+**English**
+- Left-to-right layout
 - Montserrat font
-- Standard English calendar terms
+- Standard calendar terminology
 
-### Korean (한국어)
-- LTR layout
+**Korean (한국어)**
+- Left-to-right layout
 - Montserrat font
-- Korean month names and weekdays
+- Korean calendar terms
 
-## Author 👨‍💻
+## Author
 
-**Abdulrahman Aldayel**
-
----
-
-**Readme markup was made with the help of AI**
+Abdulrahman Aldayel
